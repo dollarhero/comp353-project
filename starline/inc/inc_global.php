@@ -27,6 +27,10 @@
            echo "Your current bi-weekly period pay is $$currentPay <br>";
            echo "Your total current yearly pay is $$payroll";
         }
+        if ($jobID == 4 && $wage =='service'){
+			echo "Your weekly pay is determined upon services completed \n";
+		 
+		}
 
     }
 

@@ -19,7 +19,7 @@
 //        AND u.UnitID = a.UnitID";
        
        $query = "SELECT a.AppointmentID, s.Name AS SName, CONCAT(p.FirstName,' ',p.LastName) AS PName, CONCAT(e.FirstName,' ',e.LastName) AS EName, a.StartTime, a.EndTime, u.Name AS UName
-                FROM appointment AS a JOIN service AS s ON (a.ServiceID = s.ServiceID) JOIN patient AS p ON (p.HospitalCardID = a.PatientID) JOIN employee AS e ON (e.EmployeeID = a.EmployeeID)
+                FROM appointment AS a JOIN service AS s ON (a.ServiceID = s.ServiceID) JOIN patient AS p ON (p.HospitalCardID = a.PatientID) JOIN employee_appointment AS ea ON (a.AppointmentID = ea.AppointmentID) JOIN employee AS e ON (e.EmployeeID = ea.EmployeeID)
                 JOIN unit AS u ON (u.UnitID = a.UnitID)";
         $result = mysql_query($query);
             
@@ -49,7 +49,7 @@
         $table .= '         <td> '. $ed . ' </td>';
         $table .= '         <td> '. $unit . ' </td>';
         if ($_SESSION['JobID'] == 2 || $_SESSION['JobID'] == 3) {
-            $table .= '         <td> <a href="index.php?delete='.$row["AppointmentID"].'">Delete Now</a> </td>';  
+            $table .= '         <td> <a href="index.php?delete='.$row["AppointmentID"].'#Services">Delete Now</a> </td>';  
         } else {
             $table .= '         <td> Not Allowed </td>';
         }
@@ -111,20 +111,26 @@
     }
    
     function addService($serviceID, $patientID, $employeeID, $unitID, $startTime, $endTime) {
-        $query = "INSERT INTO appointment (StartTime, EndTime, EmployeeID, PatientID, ServiceID, UnitID)
-                  VALUES ('$startTime', '$endTime', $employeeID, $patientID, $serviceID, $unitID)";
-        if(mysql_query($query)) {
+        $result = mysql_query("SHOW TABLE STATUS LIKE 'appointment'");
+        $row = mysql_fetch_assoc($result);
+        $nextId = $row['Auto_increment'];
+        $query = "INSERT INTO appointment (AppointmentID, StartTime, EndTime, PatientID, ServiceID, UnitID)
+                  VALUES ($nextId, '$startTime', '$endTime', $patientID, $serviceID, $unitID)";
+        $query2 = "INSERT INTO employee_appointment (EmployeeID, AppointmentID) VALUES ($employeeID, $nextId)";
+        if(mysql_query($query) && mysql_query($query2)) {
             echo '<br> Service Inserted Succesfully! <br>';
         }  else {
             echo $query;
+            echo $query2;
             echo 'query error';
         }
     }
     
         
     function deleteService($id) {
-        $query = "DELETE FROM appointment WHERE AppointmentID = $id";
-        if(mysql_query($query)) {
+        $query = "DELETE FROM employee_appointment WHERE AppointmentID = $id";
+        $query2 = "DELETE FROM appointment WHERE AppointmentID = $id";
+        if(mysql_query($query) && mysql_query($query2)) {
             echo '<br> Service Deleted Succesfully! <br>';
         }  else {
             echo $query;

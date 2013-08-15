@@ -19,6 +19,9 @@ echo '<div>'.$userName.'<br/><a href="logout.php">Logout</a><br></div><br>';
 if($jobID == 1 || $jobID == 2 || $jobID == 3) {
     include 'admin.php';
 }
+else if($jobID==4){
+	include 'doctor.php';
+}
 
 
 
